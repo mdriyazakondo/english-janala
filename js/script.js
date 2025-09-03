@@ -4,11 +4,89 @@ const loadLessons = () => {
     .then((json) => displyLessons(json.data));
 };
 
+const removeBtn = () => {
+  const activeBtn = document.querySelectorAll(".lesson-btn");
+  // console.log(activeBtn);
+  activeBtn.forEach((btn) => btn.classList.remove("active"));
+};
+
+const wordSpinner = (stutas) => {
+  if (stutas === true) {
+    document.getElementById("spinner").classList.remove("hidden");
+    document.getElementById("word-container").classList.add("hidden");
+  } else {
+    document.getElementById("word-container").classList.remove("hidden");
+    document.getElementById("spinner").classList.add("hidden");
+  }
+};
+
 const loadLevelWord = (id) => {
+  wordSpinner(true);
   const url = `https://openapi.programming-hero.com/api/level/${id}`;
   fetch(url)
     .then((res) => res.json())
-    .then((data) => displyLevelWords(data.data));
+    .then((data) => {
+      removeBtn();
+      const clickBtn = document.getElementById(`lesson-btn-${id}`);
+      clickBtn.classList.add("active");
+      displyLevelWords(data.data);
+    });
+};
+
+const loadWordDetails = async (id) => {
+  const url = `https://openapi.programming-hero.com/api/word/${id}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  displayLoadWordDetals(data.data);
+};
+
+/**
+ * "data": {
+    "word": "Eager",
+    "meaning": "আগ্রহী",
+    "pronunciation": "ইগার",
+    "level": 1,
+    "sentence": "The kids were eager to open their gifts.",
+    "points": 1,
+    "partsOfSpeech": "adjective",
+    "synonyms": [
+      "enthusiastic",
+      "excited",
+      "keen"
+    ],
+    "id": 5
+  }
+*/
+
+const createElements = (arr) => {
+  const htmlElements = arr.map((el) => `<span class='btn'>${el}</span>`);
+  return htmlElements.join(" ");
+};
+
+const displayLoadWordDetals = (detalis) => {
+  const detailsBox = document.getElementById("details-container");
+  detailsBox.innerHTML = `                  
+          <div>
+            <h2 class="text-2xl font-bold">
+              ${detalis.word} ( <i class="fa-solid fa-microphone-lines"></i>:${
+    detalis.pronunciation
+  })
+            </h2>
+          </div>
+          <div>
+            <h2 class="font-bold">EMeaning</h2>
+            <p>${detalis.meaning}</p>
+          </div>
+          <div>
+            <h2 class="font-bold">Example</h2>
+            <p>${detalis.sentence}</p>
+          </div>
+          <div>
+            <h3>সমার্থক শব্দ গুলো</h3>
+              <div>${createElements(detalis.synonyms)}</div>
+          </div>
+  `;
+  document.getElementById("word_model").showModal();
 };
 
 const displyLevelWords = (words) => {
@@ -24,6 +102,7 @@ const displyLevelWords = (words) => {
                 <h2 class="text-4xl font-medium">নেক্সট Lesson এ যান</h2>
             </div>
     `;
+    wordSpinner(false);
     return;
   }
 
@@ -38,16 +117,19 @@ const displyLevelWords = (words) => {
         <div class="text-2xl font-medium font-bangla">"${
           item.meaning ? item.meaning : "অর্থ পাওয়া যায়নি"
         } / ${
-           item.pronunciation ? item.pronunciation : "pronunciation পাওয়া যায়নি"
-        }"</div>
+      item.pronunciation ? item.pronunciation : "pronunciation পাওয়া যায়নি"
+    }"</div>
         <div class="flex items-center justify-between">
-          <button class="btn bg-[#1A91FF10] hover:bg-[#1A91FF50] text-xl"><i class="fa-solid fa-circle-info"></i></button>
+          <button  onclick="loadWordDetails(${
+            item.id
+          })" class="btn bg-[#1A91FF10] hover:bg-[#1A91FF50] text-xl"><i class="fa-solid fa-circle-info"></i></button>
           <button class="btn bg-[#1A91FF10] hover:bg-[#1A91FF50] text-xl"><i class="fa-solid fa-volume-high"></i></button>
         </div>
       </div>
     `;
     wordContainer.append(cart);
   });
+  wordSpinner(false);
 };
 
 const displyLessons = (lessons) => {
@@ -57,10 +139,11 @@ const displyLessons = (lessons) => {
     const btnDiv = document.createElement("div");
     btnDiv.innerHTML = `
             <div class=''>
-                <button onclick='loadLevelWord(${lesson.level_no})' class='btn btn-outline btn-primary'><i class="fa-solid fa-book-open"></i>Lesson - ${lesson.level_no}</button>
+                <button id="lesson-btn-${lesson.level_no}" onclick='loadLevelWord(${lesson.level_no})' class='btn btn-outline btn-primary lesson-btn'><i class="fa-solid fa-book-open"></i>Lesson - ${lesson.level_no}</button>
             </div>
     `;
     levelContainer.appendChild(btnDiv);
   }
 };
+
 loadLessons();
