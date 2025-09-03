@@ -1,3 +1,9 @@
+function pronounceWord(word) {
+  const utterance = new SpeechSynthesisUtterance(word);
+  utterance.lang = "en-EN"; // English
+  window.speechSynthesis.speak(utterance);
+}
+
 const loadLessons = () => {
   fetch("https://openapi.programming-hero.com/api/levels/all")
     .then((res) => res.json())
@@ -123,7 +129,9 @@ const displyLevelWords = (words) => {
           <button  onclick="loadWordDetails(${
             item.id
           })" class="btn bg-[#1A91FF10] hover:bg-[#1A91FF50] text-xl"><i class="fa-solid fa-circle-info"></i></button>
-          <button class="btn bg-[#1A91FF10] hover:bg-[#1A91FF50] text-xl"><i class="fa-solid fa-volume-high"></i></button>
+          <button onclick="pronounceWord('${
+            item.word
+          }')" class="btn bg-[#1A91FF10] hover:bg-[#1A91FF50] text-xl"><i class="fa-solid fa-volume-high"></i></button>
         </div>
       </div>
     `;
@@ -147,3 +155,18 @@ const displyLessons = (lessons) => {
 };
 
 loadLessons();
+
+document.getElementById("btn-search").addEventListener("click", () => {
+  // removeBtn();
+  const input = document.getElementById("input-search");
+  const searchValue = input.value.trim().toLowerCase();
+  fetch("https://openapi.programming-hero.com/api/words/all")
+    .then((res) => res.json())
+    .then((data) => {
+      const allWord = data.data;
+      const filterWord = allWord.filter((word) =>
+        word.word.toLowerCase().includes(searchValue)
+      );
+      displyLevelWords(filterWord);
+    });
+});
