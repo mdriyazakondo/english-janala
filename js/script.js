@@ -115,7 +115,7 @@ const displyLevelWords = (words) => {
   words.forEach((item) => {
     const cart = document.createElement("div");
     cart.innerHTML = `
-      <div class="text-center py-10 px-10 rounded-xl bg-white space-y-4">
+      <div class="text-center py-10 px-10 rounded-xl bg-white space-y-4 shadow-md">
         <h2 class="text-2xl font-bold">${
           item.word ? item.word : "শব্দ পাওয়া যায়নি"
         }</h2>
